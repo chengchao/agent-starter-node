@@ -1,14 +1,17 @@
 import {
   type JobContext,
   type JobProcess,
-  WorkerOptions,
+  ServerOptions,
   cli,
   defineAgent,
-  inference,
   metrics,
   voice,
 } from '@livekit/agents';
+import * as cartesia from '@livekit/agents-plugin-cartesia';
+import * as deepgram from '@livekit/agents-plugin-deepgram';
+import * as elevenlabs from '@livekit/agents-plugin-elevenlabs';
 import * as livekit from '@livekit/agents-plugin-livekit';
+import * as openai from '@livekit/agents-plugin-openai';
 import * as silero from '@livekit/agents-plugin-silero';
 import { BackgroundVoiceCancellation } from '@livekit/noise-cancellation-node';
 import dotenv from 'dotenv';
@@ -57,22 +60,23 @@ export default defineAgent({
     const session = new voice.AgentSession({
       // Speech-to-text (STT) is your agent's ears, turning the user's speech into text that the LLM can understand
       // See all available models at https://docs.livekit.io/agents/models/stt/
-      stt: new inference.STT({
-        model: 'assemblyai/universal-streaming',
-        language: 'en',
-      }),
+      stt: new deepgram.STT({ model: 'nova-3' }),
 
       // A Large Language Model (LLM) is your agent's brain, processing user input and generating a response
       // See all providers at https://docs.livekit.io/agents/models/llm/
-      llm: new inference.LLM({
-        model: 'openai/gpt-4.1-mini',
+      llm: new openai.LLM({
+        model: 'gpt-5-mini',
       }),
 
       // Text-to-speech (TTS) is your agent's voice, turning the LLM's text into speech that the user can hear
       // See all available models as well as voice selections at https://docs.livekit.io/agents/models/tts/
-      tts: new inference.TTS({
-        model: 'cartesia/sonic-3',
-        voice: '9626c31c-bec5-4cca-baa8-f8ba9e84c8bc',
+      // tts: new inference.TTS({
+      //   model: 'cartesia/sonic-3',
+      //   voice: '9626c31c-bec5-4cca-baa8-f8ba9e84c8bc',
+      // }),
+      tts: new cartesia.TTS({
+        model: 'sonic-3',
+        voice: '6ccbfb76-1fc6-48f7-b71d-91ac6298247b',
       }),
 
       // VAD and turn detection are used to determine when the user is speaking and when the agent should respond
@@ -123,4 +127,4 @@ export default defineAgent({
   },
 });
 
-cli.runApp(new WorkerOptions({ agent: fileURLToPath(import.meta.url) }));
+cli.runApp(new ServerOptions({ agent: fileURLToPath(import.meta.url) }));
